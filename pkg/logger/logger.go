@@ -2,7 +2,9 @@ package logger
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -15,8 +17,28 @@ func Initialize(env string) {
 	// Set time format to YYYY/MM/DD HH:MM:SS.mmm (e.g., 2025/01/01 01:01:01.333)
 	zerolog.TimeFieldFormat = "2006/01/02 15:04:05.000"
 
-	// JSON output for all environments
-	log.Logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+	// Configure caller marshalling to include short file:line and function name
+	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
+		// Prefer repo-relative path if possible (e.g., "internal/handler/http/basic_chat_controller.go")
+		short := file
+		if i := strings.Index(file, "/simple-chatbot/"); i >= 0 {
+			short = file[i+len("/simple-chatbot/"):]
+		} else if wd, err := os.Getwd(); err == nil {
+			// Fallback to working-directory-relative path
+			if strings.HasPrefix(file, wd+"/") {
+				short = strings.TrimPrefix(file, wd+"/")
+			}
+		}
+		return fmt.Sprintf("%s:%d", short, line)
+	}
+	// Skip wrapper frames so the real caller (the site invoking Log*) is shown
+	zerolog.CallerSkipFrameCount = 3
+
+	// Build base logger
+	builder := zerolog.New(os.Stdout).With().Timestamp()
+	// Enable caller in all envs; skip wrapper frames so original callsite is shown
+	builder = builder.CallerWithSkipFrameCount(3)
+	log.Logger = builder.Logger()
 
 	// Set log level based on environment
 	if env == "local" || env == "dev" {

@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/wonjinsin/simple-chatbot/internal/constants"
@@ -46,7 +45,7 @@ func (c *BasicChatController) Ask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.LogInfo(ctx, fmt.Sprintf("answer retrieved successfully: %s", answer))
+	logger.LogInfo(ctx, "answer retrieved successfully")
 
 	utils.WriteStandardJSON(w, r, http.StatusOK, answer)
 }

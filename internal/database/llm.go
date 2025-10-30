@@ -6,6 +6,6 @@ import (
 
 func NewOllamaLLM() (*ollama.LLM, error) {
 	return ollama.New(
-		ollama.WithModel("deepseek-r1:8b"),
+		ollama.WithModel("gemma3:1b"),
 	)
 }
