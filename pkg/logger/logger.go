@@ -24,10 +24,7 @@ func Initialize(env string) {
 		if i := strings.Index(file, "/simple-chatbot/"); i >= 0 {
 			short = file[i+len("/simple-chatbot/"):]
 		} else if wd, err := os.Getwd(); err == nil {
-			// Fallback to working-directory-relative path
-			if strings.HasPrefix(file, wd+"/") {
-				short = strings.TrimPrefix(file, wd+"/")
-			}
+			short, _ = strings.CutPrefix(file, wd+"/")
 		}
 		return fmt.Sprintf("%s:%d", short, line)
 	}

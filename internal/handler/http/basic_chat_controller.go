@@ -22,7 +22,7 @@ func NewBasicChatController(svc usecase.BasicChatService) *BasicChatController {
 }
 
 // Ask handles basic chat request
-func (c *BasicChatController) Ask(w http.ResponseWriter, r *http.Request) {
+func (c *BasicChatController) AskBasicChat(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger.LogInfo(ctx, "ask request received")
 
@@ -35,7 +35,7 @@ func (c *BasicChatController) Ask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	answer, err := c.svc.Ask(ctx, req.Msg)
+	answer, err := c.svc.AskBasicChat(ctx, req.Msg)
 	if err != nil {
 		logger.LogError(ctx, "internal error in ask", err)
 
@@ -47,5 +47,31 @@ func (c *BasicChatController) Ask(w http.ResponseWriter, r *http.Request) {
 
 	logger.LogInfo(ctx, "answer retrieved successfully")
 
+	utils.WriteStandardJSON(w, r, http.StatusOK, answer)
+}
+
+// AskBasicPromptTemplateChat handles basic prompt template chat request
+func (c *BasicChatController) AskBasicPromptTemplateChat(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	logger.LogInfo(ctx, "ask basic prompt template chat request received")
+
+	var req dto.AskRequest
+	if err := utils.ParseJSONBody(r, &req); err != nil {
+		logger.LogWarn(ctx, "invalid json in request body")
+		utils.WriteStandardJSON(w, r, http.StatusBadRequest, dto.ErrorResult{
+			Msg: "invalid json",
+		}, string(constants.InvalidParameter))
+		return
+	}
+
+	answer, err := c.svc.AskBasicPromptTemplateChat(ctx, req.Msg)
+	if err != nil {
+		logger.LogError(ctx, "internal error in ask basic prompt template chat", err)
+		utils.WriteStandardJSON(w, r, http.StatusInternalServerError, dto.ErrorResult{
+			Msg: err.Error(),
+		}, string(errors.GetCode(err)))
+		return
+	}
+	logger.LogInfo(ctx, "answer basic prompt template chat retrieved successfully")
 	utils.WriteStandardJSON(w, r, http.StatusOK, answer)
 }

@@ -39,7 +39,8 @@ func NewRouter(
 
 	// Basic chat routes
 	r.Route("/basic-chat", func(r chi.Router) {
-		r.Post("/", basicChatCtrl.Ask)
+		r.Post("/", basicChatCtrl.AskBasicChat)
+		r.Post("/prompt-template", basicChatCtrl.AskBasicPromptTemplateChat)
 	})
 
 	return r

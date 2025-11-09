@@ -16,11 +16,13 @@ else
 	OS ?= $(shell uname | awk '{print tolower($0)}')
 endif
 
+.PHONY: tool
 tool:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	go install -tags 'mysql' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 	go install go.uber.org/mock/mockgen@latest
 
+.PHONY: build
 build:
 	GOOS=$(OS) go build -o $(BINARY_NAME) $(MAIN)
 
@@ -40,8 +42,10 @@ lint:
 test: build-mocks
 	go test -v -cover ./...
 
+.PHONY: test-all
 test-all: test vet fmt lint
 
+.PHONY: build-mocks
 build-mocks:
 	$(MOCK) -source=internal/usecase/service.go -destination=mock/mock_service.go -package=mock
 	$(MOCK) -source=internal/repository/repository.go -destination=mock/mock_repository.go -package=mock
@@ -67,21 +71,27 @@ infra-up:
 infra-down:
 	docker compose down
 
-# Migration commands
+# Migration command
+.PHONY: migrate-up
 migrate-up:
 	go run cmd/migrate/main.go up
 
+.PHONY: migrate-down
 migrate-down:
 	go run cmd/migrate/main.go down
 
+.PHONY: migrate-version
 migrate-version:
 	go run cmd/migrate/main.go version
 
-start:
+.PHONY: start
+start: build 
 	@$(BINARY_NAME)
 
+.PHONY: all
 all: tool init tidy vendor build
 
+.PHONY: clean
 clean:; $(info cleaning…) @ 
 	@rm -rf vendor mock bin
 	@rm -rf go.mod go.sum pkg.list

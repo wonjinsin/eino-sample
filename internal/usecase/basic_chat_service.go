@@ -15,8 +15,16 @@ func NewBasicChatService(r repository.BasicChatRepository) BasicChatService {
 	return &basicChatService{repo: r}
 }
 
-func (s *basicChatService) Ask(ctx context.Context, msg string) (string, error) {
-	answer, err := s.repo.Ask(ctx, msg)
+func (s *basicChatService) AskBasicChat(ctx context.Context, msg string) (string, error) {
+	answer, err := s.repo.AskBasicChat(ctx, msg)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to ask")
+	}
+	return answer, nil
+}
+
+func (s *basicChatService) AskBasicPromptTemplateChat(ctx context.Context, msg string) (string, error) {
+	answer, err := s.repo.AskBasicPromptTemplateChat(ctx, msg)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to ask")
 	}

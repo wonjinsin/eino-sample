@@ -1,11 +1,20 @@
 package database
 
 import (
-	"github.com/tmc/langchaingo/llms/ollama"
+	"context"
+	"time"
+
+	"github.com/cloudwego/eino-ext/components/model/ollama"
 )
 
-func NewOllamaLLM() (*ollama.LLM, error) {
-	return ollama.New(
-		ollama.WithModel("gemma3:1b"),
-	)
+func NewOllamaLLM() (*ollama.ChatModel, error) {
+	ctx := context.Background()
+	return ollama.NewChatModel(ctx, &ollama.ChatModelConfig{
+		// Basic Configuration
+		BaseURL: "http://localhost:11434", // Ollama service address
+		Timeout: 30 * time.Second,         // Request timeout
+
+		// Model Configuration
+		Model: "gemma3:1b", // Model name
+	})
 }

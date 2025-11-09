@@ -16,5 +16,6 @@ type UserRepository interface {
 
 // BasicChatRepository defines the interface for basic chat data access
 type BasicChatRepository interface {
-	Ask(ctx context.Context, msg string) (string, error)
+	AskBasicChat(ctx context.Context, msg string) (string, error)
+	AskBasicPromptTemplateChat(ctx context.Context, msg string) (string, error)
 }

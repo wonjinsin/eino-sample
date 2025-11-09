@@ -15,5 +15,6 @@ type UserService interface {
 
 // BasicChatService defines the interface for basic chat business logic
 type BasicChatService interface {
-	Ask(ctx context.Context, msg string) (string, error)
+	AskBasicChat(ctx context.Context, msg string) (string, error)
+	AskBasicPromptTemplateChat(ctx context.Context, msg string) (string, error)
 }
