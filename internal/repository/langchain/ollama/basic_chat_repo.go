@@ -433,3 +433,102 @@ func (r *basicChatRepo) AskWithGraph(ctx context.Context, _ string) (string, err
 
 	return result.Content, nil
 }
+
+func (r *basicChatRepo) AskWithGraphWithBranch(ctx context.Context, _ string) (string, error) {
+	template := prompt.FromMessages(
+		schema.GoTemplate,
+		schema.SystemMessage(
+			`You are an emotion-analysis expert.
+			Analyze the user’s message and classify their emotion as one of the following: 'positive', 'negative', or 'neutral'.
+			Your answer must consist of one single word only.`,
+		),
+		schema.UserMessage(
+			`Please analyze the following message and classify the emotion: {{.message}}`,
+		),
+	)
+
+	cond := func(ctx context.Context, kvs map[string]any) (string, error) {
+		emotion, _ := kvs["emotion"].(string)
+		return emotion, nil
+	}
+
+	positive := compose.InvokableLambda(func(ctx context.Context, kvs map[string]any) (map[string]any, error) {
+		kvs["response"] = "The user is feeling positive."
+		return kvs, nil
+	})
+
+	negative := compose.InvokableLambda(func(ctx context.Context, kvs map[string]any) (map[string]any, error) {
+		kvs["response"] = "The user is feeling negative."
+		return kvs, nil
+	})
+
+	neutral := compose.InvokableLambda(func(ctx context.Context, kvs map[string]any) (map[string]any, error) {
+		kvs["response"] = "The user is feeling neutral."
+		return kvs, nil
+	})
+
+	const (
+		nodeOfPrompt    = "prompt"
+		nodeOfModel     = "model"
+		nodeOfEmotion   = "emotion"
+		nodeOfPositive  = "positive"
+		nodeOfNegative  = "negative"
+		nodeOfNeutral   = "neutral"
+		nodeOfFinalizer = "finalizer"
+	)
+
+	emotionParser := compose.InvokableLambda(func(ctx context.Context, msg *schema.Message) (map[string]any, error) {
+		emotion := strings.ToLower(strings.TrimSpace(msg.Content))
+		return map[string]any{
+			"emotion": emotion,
+		}, nil
+	})
+
+	finalizer := compose.InvokableLambda(func(ctx context.Context, kvs map[string]any) (*schema.Message, error) {
+		response, _ := kvs["response"].(string)
+		return &schema.Message{
+			Role:    schema.Assistant,
+			Content: response,
+		}, nil
+	})
+
+	g := compose.NewGraph[map[string]any, *schema.Message]()
+
+	g.AddChatTemplateNode(nodeOfPrompt, template)
+	g.AddChatModelNode(nodeOfModel, r.ollamaLLM)
+	g.AddLambdaNode(nodeOfEmotion, emotionParser)
+	g.AddLambdaNode(nodeOfPositive, positive)
+	g.AddLambdaNode(nodeOfNegative, negative)
+	g.AddLambdaNode(nodeOfNeutral, neutral)
+	g.AddLambdaNode(nodeOfFinalizer, finalizer)
+
+	// 엣지 연결
+	g.AddEdge(compose.START, nodeOfPrompt)
+	g.AddEdge(nodeOfPrompt, nodeOfModel)
+	g.AddEdge(nodeOfModel, nodeOfEmotion)
+
+	g.AddBranch(nodeOfEmotion, compose.NewGraphBranch(cond, map[string]bool{
+		"positive": true,
+		"negative": true,
+		"neutral":  true,
+	}))
+
+	g.AddEdge(nodeOfPositive, nodeOfFinalizer)
+	g.AddEdge(nodeOfNegative, nodeOfFinalizer)
+	g.AddEdge(nodeOfNeutral, nodeOfFinalizer)
+	g.AddEdge(nodeOfFinalizer, compose.END)
+
+	chain, err := g.Compile(ctx)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to compile graph")
+	}
+
+	result, err := chain.Invoke(ctx, map[string]any{
+		"message": "I'm having a great day!",
+	})
+	if err != nil {
+		return "", errors.Wrap(err, "failed to invoke graph")
+	}
+
+	return result.Content, nil
+}
