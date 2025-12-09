@@ -502,7 +502,6 @@ func (r *basicChatRepo) AskWithGraphWithBranch(ctx context.Context, _ string) (s
 	g.AddLambdaNode(nodeOfNeutral, neutral)
 	g.AddLambdaNode(nodeOfFinalizer, finalizer)
 
-	// 엣지 연결
 	g.AddEdge(compose.START, nodeOfPrompt)
 	g.AddEdge(nodeOfPrompt, nodeOfModel)
 	g.AddEdge(nodeOfModel, nodeOfEmotion)
@@ -524,7 +523,7 @@ func (r *basicChatRepo) AskWithGraphWithBranch(ctx context.Context, _ string) (s
 	}
 
 	result, err := chain.Invoke(ctx, map[string]any{
-		"message": "I'm having a great day!",
+		"message": "I'm having a normal day!",
 	})
 	if err != nil {
 		return "", errors.Wrap(err, "failed to invoke graph")
