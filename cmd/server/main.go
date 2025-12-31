@@ -38,7 +38,7 @@ func main() {
 		log.Fatalf("failed to initialize LLM: %v", err)
 	}
 
-	// Initialize database connection
+	// Initialize repository
 	basicChatRepo := langchain.NewBasicChatRepo(ollamaLLM)
 
 	// Wiring (Composition Root)

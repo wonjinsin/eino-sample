@@ -1,119 +1,139 @@
-# Go HTTP Boilerplate
+# Eino Feature Testing Project
 
-A production-ready HTTP API boilerplate built with Go, following Clean Architecture principles with clear layer separation, custom error handling, and structured logging.
+A demonstration project showcasing **Cloudwego Eino** framework capabilities for LLM application development. This project implements various Eino patterns including chains, parallel execution, branching, tool integration, and graph-based workflows.
 
 ## ✨ Features
 
-- **Clean Architecture** with clear layer separation (Domain, Repository, UseCase, Handler)
+### Eino Framework Demonstrations
+
+This project showcases the following Eino capabilities:
+
+- **Basic Chat** - Simple LLM conversation with message history
+- **Prompt Templates** - Go template-based prompt construction with variable interpolation
+- **Parallel Execution** - Concurrent execution of multiple LLM operations
+- **Branch Logic** - Conditional workflow branching based on runtime conditions
+- **Tool Integration** - External tool calling (DuckDuckGo web search)
+- **Graph Workflows** - Node-based execution graphs with explicit edge definitions
+- **Complex Graphs** - Advanced graph workflows with conditional branching
+
+### Architecture Features
+
+- **Clean 3-Layer Architecture** (Handler → UseCase → Repository)
 - **Custom Error Handling** system with 4-digit error codes aligned to HTTP status codes
 - **Structured Logging** with TrID (Transaction ID) tracking using Zerolog
-- **EntGo ORM** with PostgreSQL for type-safe database operations
-- **Database Migrations** with go-migrate for version-controlled schema changes
-- **Docker Compose** for local development infrastructure
 - **HTTP Middleware Stack** (CORS, logging, request ID, recovery)
 - **Standard JSON Response Format** with transaction ID and status codes
-- **Environment-based Configuration** with fail-fast validation
 
 ## 🛠 Tech Stack
 
-- **Go** 1.21+
+- **Go** 1.24+
+- **Cloudwego Eino** v0.6.0 - LLM orchestration framework
+- **Eino-ext** - Ollama model adapter and tool extensions
+- **Ollama** - Local LLM inference engine
 - **Chi Router** - Lightweight, idiomatic HTTP router
-- **EntGo** - Type-safe ORM with code generation
-- **PostgreSQL** - Primary database
 - **Zerolog** - Structured JSON logging
-- **go-migrate** - Database migration tool
-- **Docker Compose** - Local infrastructure management
+- **LangChainGo** - Additional LLM utilities
+- **go.uber.org/mock** - Mock generation for testing
 
 ## 📋 Prerequisites
 
-- Go 1.21 or higher
-- Docker and Docker Compose
-- Make (optional, for convenience commands)
+- **Go 1.24 or higher**
+- **Ollama** - For running LLMs locally
+- **Make** (optional, for convenience commands)
 
 ## 🚀 Quick Start
 
-### Installation & Setup
+### 1. Install Ollama
 
-1. **Clone the repository**
+Download and install Ollama from [https://ollama.com](https://ollama.com)
 
-   ```bash
-   git clone <repository-url>
-   cd go-boilerplate
-   ```
+```bash
+# macOS/Linux
+curl -fsSL https://ollama.com/install.sh | sh
 
-2. **Install Go dependencies**
+# Or download from website for your platform
+```
 
-   ```bash
-   go mod download
-   go mod tidy
-   ```
+### 2. Pull the LLM Model
 
-3. **Configure environment**
+The project is configured to use `gemma3:1b` by default:
 
-   The `.env.local` file is already included in the project with default settings:
+```bash
+ollama pull gemma3:1b
+```
 
-   ```
-   PORT=8080
-   ENV=local
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_USER=postgres
-   DB_PASSWORD=postgres
-   DB_NAME=go_boilerplate
-   DB_SSLMODE=disable
-   ```
+Verify Ollama is running:
 
-   You can modify these values if needed for your local environment.
+```bash
+ollama list
+# Should show gemma3:1b in the list
+```
 
-4. **Start infrastructure (PostgreSQL)**
+### 3. Clone the Repository
 
-   ```bash
-   make infra-up
-   # Wait for PostgreSQL to be ready (5-10 seconds)
-   ```
+```bash
+git clone <repository-url>
+cd eino-sample
+```
 
-5. **Run database migrations**
+### 4. Configure Environment
 
-   ```bash
-   make migrate-up
-   ```
+Create a `.env.local` file in the project root:
 
-6. **Build the application**
+```env
+PORT=8080
+ENV=local
+```
 
-   ```bash
-   make build
-   ```
+You can modify these values as needed for your environment.
 
-7. **Run the server**
+### 5. Setup and Build
 
-   ```bash
-   ./bin/server
-   # or for development: go run cmd/server/main.go
-   ```
+Run the all-in-one setup command:
 
-   You should see:
+```bash
+make all
+```
 
-   ```
-   [ASCII art banner]
-   Configuration loaded: ENV=local, PORT=8080, DB=postgres@localhost:5432/go_boilerplate
-   HTTP server starting on :8080
-   ```
+This will:
 
-### Testing the API
+- Install development tools (golangci-lint, mockgen)
+- Initialize Go modules
+- Tidy dependencies
+- Vendor dependencies
+- Build the application
 
-Once the server is running, test the endpoints using curl:
+### 6. Run the Server
 
-#### 1. Health Check
+```bash
+# Run the built binary
+./bin/server
+
+# Or run directly with go (for development)
+go run cmd/server/main.go
+```
+
+You should see:
+
+```
+[ASCII art banner]
+Configuration loaded: ENV=local, PORT=8080, ...
+HTTP server starting on :8080
+```
+
+## 🧪 Testing the API
+
+### Health Check
 
 ```bash
 curl http://localhost:8080/healthz
 ```
 
-Expected response:
+**Response:**
 
 ```json
 {
-  "trid": "2025102616501424416161",
+  "trid": "2025103112345678901234",
   "code": "0200",
   "result": {
     "status": "ok"
@@ -121,194 +141,342 @@ Expected response:
 }
 ```
 
-#### 2. Create a User
+### Basic Chat
+
+Test the basic Eino chat functionality:
 
 ```bash
-curl -X POST http://localhost:8080/users \
+curl -X POST http://localhost:8080/basic-chat \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "John Doe",
-    "email": "john@example.com"
+    "msg": "Hello"
   }'
 ```
 
-Expected response:
+**Response:**
 
 ```json
 {
-  "trid": "2025102616501424416162",
-  "code": "0201",
-  "result": {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john@example.com",
-    "created_at": "2025-10-26T16:50:14.241Z"
-  }
-}
-```
-
-#### 3. Get User by ID
-
-```bash
-curl http://localhost:8080/users/1
-```
-
-Expected response:
-
-```json
-{
-  "trid": "2025102616501424416163",
+  "trid": "2025103112345678901235",
   "code": "0200",
-  "result": {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john@example.com",
-    "created_at": "2025-10-26T16:50:14.241Z"
-  }
+  "result": "The three main functions of LangChain are: 1) Prompt Management, 2) Chain Composition, and 3) Agent Development."
 }
 ```
 
-#### 4. List Users (with pagination)
+This endpoint demonstrates:
+
+- Multi-turn conversation with system and user messages
+- Message history management
+- Basic LLM Generate() call
+
+### Prompt Template Chat
+
+Test prompt template with variable interpolation and JSON parsing:
 
 ```bash
-curl "http://localhost:8080/users?offset=0&limit=10"
-```
-
-Expected response:
-
-```json
-{
-  "trid": "2025102616501424416164",
-  "code": "0200",
-  "result": {
-    "users": [
-      {
-        "id": 1,
-        "name": "John Doe",
-        "email": "john@example.com",
-        "created_at": "2025-10-26T16:50:14.241Z"
-      }
-    ],
-    "total": 1,
-    "offset": 0,
-    "limit": 10
-  }
-}
-```
-
-#### 5. Test Error Handling
-
-Try creating a duplicate user:
-
-```bash
-curl -X POST http://localhost:8080/users \
+curl -X POST http://localhost:8080/basic-chat/prompt-template \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "John Doe",
-    "email": "john@example.com"
+    "msg": "Generate report"
   }'
 ```
 
-Expected error response (409 Conflict):
+**Response:**
 
 ```json
 {
-  "trid": "2025102616501424416165",
-  "code": "0409",
-  "result": {
-    "msg": "duplicate email"
-  }
+  "trid": "2025103112345678901236",
+  "code": "0200",
+  "result": "The user is feeling neutral."
 }
 ```
 
-Try getting a non-existent user:
+This endpoint demonstrates:
 
-```bash
-curl http://localhost:8080/users/999
-```
-
-Expected error response (404 Not Found):
-
-```json
-{
-  "trid": "2025102616501424416166",
-  "code": "0404",
-  "result": {
-    "msg": "failed to get user: user not found: ent: user not found"
-  }
-}
-```
+- Go template-based prompt construction
+- Variable interpolation (user, company, date)
+- JSON response parsing with custom parser
+- Chain composition: Template → Model → Parser
+- Graph workflow with emotion analysis and conditional branching
 
 ## 📁 Project Structure
 
 ```
-├── cmd/                    # Application entrypoints
-│   ├── server/            # HTTP server
-│   └── migrate/           # Migration runner
-├── internal/              # Private application code
-│   ├── config/           # Configuration management
-│   ├── constants/        # Error codes and constants
-│   ├── domain/           # Domain entities and business logic
-│   ├── handler/          # HTTP handlers and middleware
+├── cmd/
+│   └── server/                # HTTP server entrypoint
+│       └── main.go            # Application bootstrap
+├── internal/                  # Private application code
+│   ├── config/                # Configuration management
+│   │   ├── config.go          # Environment variable loading
+│   │   └── banner.asc         # ASCII art banner
+│   ├── constants/             # Error codes and constants
+│   │   ├── errors.go          # Error code definitions
+│   │   └── app.go             # Application constants
+│   ├── database/              # LLM initialization
+│   │   └── llm.go             # Ollama LLM configuration
+│   ├── domain/                # (Reserved for future domain models)
+│   ├── handler/               # HTTP layer
 │   │   └── http/
-│   │       ├── dto/      # Data transfer objects
-│   │       └── middleware/ # HTTP middleware
-│   ├── repository/       # Data access layer
-│   │   ├── repository.go # Repository interfaces
-│   │   └── postgres/     # PostgreSQL implementation
-│   │       ├── dao/      # EntGo generated code
-│   │       └── user_mapper.go # Domain-DAO mapping
-│   ├── usecase/          # Business use cases
-│   │   ├── service.go    # Service interfaces
-│   │   └── user_service.go # Service implementation
-│   └── shared/           # Shared utilities
-├── pkg/                   # Public reusable packages
-│   ├── constants/        # Shared constants
-│   ├── errors/           # Custom error system
-│   ├── logger/           # Logging utilities
-│   └── utils/            # Common utilities
-├── migrations/            # Database migrations
-├── test/                  # Tests and mocks
-├── docker-compose.yml     # Local infrastructure
-├── Makefile              # Development commands
-└── .env.local            # Local configuration
+│   │       ├── basic_chat_controller.go  # Chat endpoints
+│   │       ├── health_controller.go      # Health check
+│   │       ├── routes.go                 # Route definitions
+│   │       ├── dto/                      # Data transfer objects
+│   │       └── middleware/               # HTTP middleware
+│   │           ├── cors.go               # CORS handling
+│   │           ├── http_logger.go        # Request logging
+│   │           └── tr_id.go              # Transaction ID injection
+│   ├── repository/            # Eino implementations
+│   │   ├── repository.go      # Repository interfaces
+│   │   └── langchain/ollama/
+│   │       └── basic_chat_repo.go  # All Eino feature implementations
+│   │   └── shared/
+│   │       └── parser.go      # JSON parser utilities
+│   ├── usecase/               # Business logic
+│   │   ├── service.go         # Service interfaces
+│   │   └── basic_chat_service.go  # Service implementation
+│   └── shared/                # Shared utilities
+│       └── utils/
+├── pkg/                       # Reusable packages
+│   ├── constants/             # Shared constants
+│   ├── errors/                # Custom error system
+│   │   └── errors.go          # Error codes and wrapping
+│   ├── logger/                # Logging utilities
+│   │   └── logger.go          # Zerolog wrapper with TrID
+│   └── utils/                 # Common utilities
+│       ├── http.go            # HTTP helpers
+│       ├── id.go              # ID generation
+│       └── string.go          # String utilities
+├── mock/                      # Generated mocks
+├── test/                      # Tests and test utilities
+├── main.go                    # Simple Ollama test script
+├── Makefile                   # Development commands
+├── go.mod                     # Go module definition
+├── go.sum                     # Go module checksums
+└── README.md                  # This file
 ```
+
+## 🏗 Architecture
+
+### 3-Layer Architecture
+
+```
+┌─────────────────────────────────────────┐
+│         Handler Layer (HTTP)            │
+│  • HTTP Controllers                     │
+│  • Middleware (CORS, Logging, TrID)     │
+│  • Request/Response DTOs                │
+│  • Error handling & logging             │
+└──────────────┬──────────────────────────┘
+               │ depends on
+               ▼
+┌─────────────────────────────────────────┐
+│       UseCase Layer (Service)           │
+│  • Business orchestration               │
+│  • Service interfaces                   │
+│  • Application workflows                │
+└──────────────┬──────────────────────────┘
+               │ depends on
+               ▼
+┌─────────────────────────────────────────┐
+│     Repository Layer (Eino LLM)         │
+│  • Eino chains, graphs, workflows       │
+│  • LLM model interactions               │
+│  • Tool integrations                    │
+│  • Prompt template management           │
+└─────────────────────────────────────────┘
+```
+
+### Dependency Flow
+
+```
+Handler (HTTP) → UseCase (Service) → Repository (Eino)
+     ↓                  ↓                    ↓
+  [Log]          [Orchestrate]        [LLM Chains/Graphs]
+```
+
+## 🎯 Eino Features in Detail
+
+All Eino feature implementations are in [`internal/repository/langchain/ollama/basic_chat_repo.go`](internal/repository/langchain/ollama/basic_chat_repo.go). While only 2 are exposed via HTTP endpoints, you can explore all 7 implementations:
+
+### 1. Basic Chat (`AskBasicChat`)
+
+Simple conversation with LLM using message history.
+
+```go
+messages := []*schema.Message{
+    {Role: schema.System, Content: "You are a helpful assistant."},
+    {Role: schema.User, Content: "Please explain about langchain."},
+    {Role: schema.Assistant, Content: "LangChain is a library..."},
+    {Role: schema.User, Content: "Please answer the 3 main function."},
+}
+resp, err := r.ollamaLLM.Generate(ctx, messages)
+```
+
+**Key concepts:** Message history, system prompts, basic Generate() call
+
+### 2. Prompt Template (`AskBasicPromptTemplateChat`)
+
+Go template-based prompts with variable interpolation and JSON parsing.
+
+```go
+template := prompt.FromMessages(
+    schema.GoTemplate,
+    schema.SystemMessage("You are a JSON-only response assistant..."),
+    schema.UserMessage("Generate a report for {{.user}} on {{.date}}..."),
+)
+
+chain, err := compose.NewChain[map[string]any, *JSONResponse]().
+    AppendChatTemplate(template).
+    AppendChatModel(r.ollamaLLM).
+    AppendLambda(jsonParserLambda).
+    Compile(ctx)
+
+result, err := chain.Invoke(ctx, variables)
+```
+
+**Key concepts:** Template variables, chain composition, custom parsers
+
+### 3. Parallel Execution (`AskBasicParallelChat`)
+
+Concurrent execution of multiple operations.
+
+```go
+finalChain, err := compose.NewChain[map[string]any, map[string]any]().
+    AppendParallel(
+        compose.NewParallel().
+            AddGraph("ask", askChain).           // LLM call
+            AddLambda("length", lengthLambda).   // String length
+            AddLambda("upper", upperLambda),     // Uppercase
+    ).
+    Compile(ctx)
+```
+
+**Key concepts:** Parallel component, concurrent operations, result aggregation
+
+### 4. Branch Logic (`AskBasicBranchChat`)
+
+Conditional workflow branching.
+
+```go
+roleCond := func(ctx context.Context, kvs map[string]any) (string, error) {
+    if kvs["word"] == "a" {
+        return "dog", nil
+    }
+    return "cat", nil
+}
+
+chain, err := compose.NewChain[map[string]any, *schema.Message]().
+    AppendBranch(
+        compose.NewChainBranch(roleCond).
+            AddLambda("dog", dog).
+            AddLambda("cat", cat),
+    ).
+    AppendChatTemplate(template).
+    AppendChatModel(r.ollamaLLM).
+    Compile(ctx)
+```
+
+**Key concepts:** Conditional branching, dynamic workflow paths
+
+### 5. Tool Integration (`AskWithTool`)
+
+Integration of external tools (web search).
+
+```go
+searchTool, err := duckduckgo.NewTextSearchTool(ctx, &duckduckgo.Config{
+    MaxResults: 3,
+    Region:     duckduckgo.RegionWT,
+})
+
+llmWithTools, err := r.ollamaLLM.WithTools([]*schema.ToolInfo{toolInfo})
+
+chain, err := compose.NewChain[map[string]any, *schema.Message]().
+    AppendChatTemplate(initialPrompt).
+    AppendChatModel(llmWithTools).
+    AppendToolsNode(toolsNode).
+    AppendChatModel(r.ollamaLLM).
+    Compile(ctx)
+```
+
+**Key concepts:** Tool calling, ToolNode, multi-step chains
+
+### 6. Graph Workflow (`AskWithGraph`)
+
+Node-based execution graphs.
+
+```go
+g := compose.NewGraph[map[string]any, *schema.Message]()
+g.AddLambdaNode(greetingNode, greeting)
+g.AddLambdaNode(processNode, process)
+g.AddEdge(compose.START, greetingNode)
+g.AddEdge(greetingNode, processNode)
+g.AddEdge(processNode, compose.END)
+
+res, err := g.Compile(ctx)
+result, err := res.Invoke(ctx, input)
+```
+
+**Key concepts:** Graph nodes, edges, START/END nodes
+
+### 7. Graph with Branch (`AskWithGraphWithBranch`)
+
+Complex graph with conditional branching (emotion analysis).
+
+```go
+const (
+    nodeOfPrompt    = "prompt"
+    nodeOfModel     = "model"
+    nodeOfEmotion   = "emotion"
+    nodeOfPositive  = "positive"
+    nodeOfNegative  = "negative"
+    nodeOfNeutral   = "neutral"
+)
+
+g.AddBranch(nodeOfEmotion, compose.NewGraphBranch(cond, map[string]bool{
+    "positive": true,
+    "negative": true,
+    "neutral":  true,
+}))
+```
+
+**Key concepts:** GraphBranch, emotion classification, dynamic routing
 
 ## ⚙️ Configuration
 
-Environment variables (all required):
+### Environment Variables
 
-| Variable      | Description                    | Example          |
-| ------------- | ------------------------------ | ---------------- |
-| `PORT`        | Server port                    | `8080`           |
-| `ENV`         | Environment (local, dev, prod) | `local`          |
-| `DB_HOST`     | PostgreSQL host                | `localhost`      |
-| `DB_PORT`     | PostgreSQL port                | `5432`           |
-| `DB_USER`     | Database user                  | `postgres`       |
-| `DB_PASSWORD` | Database password              | `postgres`       |
-| `DB_NAME`     | Database name                  | `go_boilerplate` |
-| `DB_SSLMODE`  | SSL mode                       | `disable`        |
+| Variable | Description | Default/Example | Required |
+| -------- | ----------- | --------------- | -------- |
+| `PORT`   | Server port | `8080`          | Yes      |
+| `ENV`    | Environment | `local`         | Yes      |
+
+### Ollama Configuration
+
+The Ollama LLM is configured in [`internal/database/llm.go`](internal/database/llm.go):
+
+```go
+ollama.NewChatModel(ctx, &ollama.ChatModelConfig{
+    BaseURL: "http://localhost:11434",  // Ollama service address
+    Timeout: 30 * time.Second,          // Request timeout
+    Model:   "gemma3:1b",                // Model name
+})
+```
+
+To use a different model:
+
+1. Pull the model: `ollama pull <model-name>`
+2. Update `Model` field in `llm.go`
+3. Rebuild and restart the server
+
+Popular models:
+
+- `gemma3:1b` - Fast, lightweight
+- `llama2` - General purpose
+- `codellama` - Code-focused
+- `mistral` - Balanced performance
+- `deepseek-r1:8b` - Reasoning model
 
 ## 🔧 Development Guide
-
-### Database Management
-
-```bash
-# Start PostgreSQL
-make infra-up
-
-# Stop PostgreSQL
-make infra-down
-
-# Run migrations
-make migrate-up
-
-# Rollback migrations
-make migrate-down
-
-# Check migration version
-make migrate-version
-```
 
 ### Build and Run
 
@@ -316,12 +484,13 @@ make migrate-version
 # Build the application
 make build
 
-# Run the server
+# Run the built binary
 ./bin/server
-# or
+
+# Or run directly
 make start
 
-# Development mode (hot reload)
+# Development mode (no build)
 go run cmd/server/main.go
 ```
 
@@ -331,10 +500,13 @@ go run cmd/server/main.go
 # Run tests
 make test
 
+# Run tests with coverage
+go test -v -cover ./...
+
 # Generate mocks
 make build-mocks
 
-# Run full test suite (tests + vet + fmt + lint)
+# Full test suite (tests + vet + fmt + lint)
 make test-all
 ```
 
@@ -347,7 +519,7 @@ make fmt
 # Vet code
 make vet
 
-# Lint code
+# Lint code (requires golangci-lint)
 make lint
 ```
 
@@ -357,20 +529,34 @@ make lint
 # Install all development tools
 make tool
 
-# Clean build artifacts
+# This installs:
+# - golangci-lint (linting)
+# - mockgen (mock generation)
+```
+
+### Clean Up
+
+```bash
+# Clean build artifacts, mocks, vendor
 make clean
+```
+
+### Vendor Dependencies
+
+```bash
+# Vendor all dependencies
+make vendor
 ```
 
 ## 📡 API Documentation
 
 ### Endpoints
 
-| Method | Path          | Description            | Auth |
-| ------ | ------------- | ---------------------- | ---- |
-| `GET`  | `/healthz`    | Health check           | No   |
-| `POST` | `/users`      | Create user            | No   |
-| `GET`  | `/users`      | List users (paginated) | No   |
-| `GET`  | `/users/{id}` | Get user by ID         | No   |
+| Method | Path                          | Description                     |
+| ------ | ----------------------------- | ------------------------------- |
+| `GET`  | `/healthz`                    | Health check                    |
+| `POST` | `/basic-chat`                 | Basic LLM chat                  |
+| `POST` | `/basic-chat/prompt-template` | Prompt template with graph flow |
 
 ### Request/Response Format
 
@@ -379,191 +565,127 @@ All responses follow a standard format:
 ```json
 {
   "trid": "string", // Transaction ID for request tracing
-  "code": "string", // 4-digit status code (e.g., "0200", "0404")
+  "code": "string", // 4-digit status code (e.g., "0200", "0404", "0500")
   "result": {} // Response data or error message
 }
 ```
 
-#### Success Response Example
+#### Success Response
 
 ```json
 {
-  "trid": "2025102616501424416161",
+  "trid": "2025103112345678901234",
   "code": "0200",
-  "result": {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john@example.com"
-  }
+  "result": "Your LLM response here"
 }
 ```
 
-#### Error Response Example
+#### Error Response
 
 ```json
 {
-  "trid": "2025102616501424416162",
-  "code": "0404",
+  "trid": "2025103112345678901235",
+  "code": "0500",
   "result": {
-    "msg": "failed to get user: user not found"
+    "msg": "failed to ask: LLM error details"
   }
 }
 ```
 
-## 🏗 Architecture
+### Error Codes
 
-### Clean Architecture Layers
+The custom error system uses 4-digit codes aligned with HTTP status codes:
 
-```
-┌─────────────────────────────────────────┐
-│           Handler Layer                 │
-│  (HTTP Controllers, Middleware, DTOs)   │
-│  - Request/Response handling            │
-│  - Logging and error handling           │
-└──────────────┬──────────────────────────┘
-               │ depends on
-               ▼
-┌─────────────────────────────────────────┐
-│           UseCase Layer                 │
-│     (Business Logic, Services)          │
-│  - Application workflows                │
-│  - Business orchestration               │
-└──────────────┬──────────────────────────┘
-               │ depends on
-               ▼
-┌─────────────────────────────────────────┐
-│         Repository Layer                │
-│    (Data Access, EntGo, Mappers)        │
-│  - Database operations                  │
-│  - Domain-DAO transformation            │
-└──────────────┬──────────────────────────┘
-               │ depends on
-               ▼
-┌─────────────────────────────────────────┐
-│           Domain Layer                  │
-│   (Business Entities, Validation)       │
-│  - Domain models and rules              │
-│  - Pure business logic                  │
-└─────────────────────────────────────────┘
-```
+| Code   | HTTP Status         | Description               |
+| ------ | ------------------- | ------------------------- |
+| `0200` | 200 OK              | Success                   |
+| `0400` | 400 Bad Request     | Invalid input             |
+| `0404` | 404 Not Found       | Resource not found        |
+| `0409` | 409 Conflict        | Conflict (e.g. duplicate) |
+| `0500` | 500 Internal Server | Server/LLM error          |
 
-### Dependency Flow
+## 🔑 Key Conventions
 
-```
-Handler → UseCase → Repository → Domain
-  (HTTP)    (Service)  (Data Access)  (Entity)
-    ↓           ↓           ↓            ↓
-  [Log]    [Orchestrate] [Transform]  [Validate]
-```
+### Error Handling
 
-### Error Handling Strategy
-
-1. **Domain Layer**: Creates errors with validation messages
-2. **Repository Layer**: Wraps database errors with context
-3. **UseCase Layer**: Wraps errors from repository
-4. **Handler Layer**: Extracts error codes and determines HTTP status
+Always use the custom error system:
 
 ```go
-// Domain Layer
-errors.New(constants.InvalidParameter, "invalid email", nil)
+// Create error with code
+errors.New(constants.InternalServerError, "LLM failed", err)
 
-// Repository Layer
-errors.Wrap(err, "failed to find user")
+// Wrap error with context
+errors.Wrap(err, "failed to generate response")
 
-// UseCase Layer
-errors.Wrap(err, "failed to get user")
-
-// Handler Layer
-code := errors.GetCode(err)  // "0404"
-httpStatus := http.StatusNotFound  // 404
+// Extract error code in handler
+code := errors.GetCode(err)  // Returns "0500"
 ```
 
 ### Logging Strategy
 
-- **Structured JSON logging** with Zerolog
-- **TrID (Transaction ID)** in all logs for request correlation
-- **Log only at handler layer** (controllers, middleware)
-- **No logging in usecase or repository layers**
+- **Log ONLY at handler layer** (controllers, middleware)
+- **Never log in usecase or repository layers**
+- All logs include TrID for request tracing
+- Use structured JSON format
 
-Log format:
-
-```json
-{
-  "level": "info",
-  "trid": "2025102616501424416161",
-  "time": "2025/01/01 01:01:01.333",
-  "message": "user created successfully"
-}
+```go
+logger.LogInfo(ctx, "request received")
+logger.LogError(ctx, "LLM error", err)
 ```
 
-## 📐 Conventions
+### Transaction ID (TrID)
 
-Key development conventions:
+Every request gets a unique transaction ID for tracing:
 
-1. **Custom Collection Types**: Always use named slice types
+```go
+// Generated by middleware
+trid := ctx.Value(constants.ContextKeyTrID).(string)
 
-   ```go
-   // Define in domain
-   type Users []*User
-
-   // Use everywhere
-   func GetUsers() (Users, error)
-   ```
-
-2. **Error Handling**: Use custom error system
-
-   ```go
-   // Create error
-   errors.New(constants.NotFound, "user not found", err)
-
-   // Wrap error
-   errors.Wrap(err, "failed to get user")
-   ```
-
-3. **UTC Timezone**: Set globally in main.go
-
-   ```go
-   time.Local = time.UTC
-   ```
-
-4. **Interface Definitions**:
-
-   - Repository interfaces in `internal/repository/`
-   - Service interfaces in `internal/usecase/`
-
-5. **DTO Mapping**: Separate mapper files
-   - `user_mapper.go` for domain → DTO transformations
-   - Keep DTOs in `internal/handler/http/dto/`
-
-## 🔨 Development Commands
-
-| Command                | Description                              |
-| ---------------------- | ---------------------------------------- |
-| `make infra-up`        | Start Docker infrastructure (PostgreSQL) |
-| `make infra-down`      | Stop Docker infrastructure               |
-| `make migrate-up`      | Run database migrations                  |
-| `make migrate-down`    | Rollback database migrations             |
-| `make migrate-version` | Check current migration version          |
-| `make build`           | Build the application                    |
-| `make start`           | Run the built binary                     |
-| `make test`            | Run unit tests                           |
-| `make build-mocks`     | Generate mock implementations            |
-| `make test-all`        | Run tests + vet + fmt + lint             |
-| `make fmt`             | Format code with go fmt                  |
-| `make vet`             | Vet code with go vet                     |
-| `make lint`            | Lint code with golangci-lint             |
-| `make tool`            | Install development tools                |
-| `make clean`           | Clean build artifacts                    |
+// Included in all logs and responses
+```
 
 ## 🤝 Contributing
 
-1. Follow the conventions in `.cursor/rules/convention.mdc`
-2. Write tests for new features
+Contributions are welcome! When adding new features:
+
+1. **Testing new Eino features**: Add new methods to `basic_chat_repo.go`
+2. **Adding endpoints**: Update `routes.go` and create controller methods
+3. **Improving prompts**: Enhance prompt templates for better LLM responses
+4. **Documentation**: Update this README with new examples
+
+### Development Flow
+
+1. Follow conventions in `.cursor/rules/convention.mdc`
+2. Write tests for new features (use `make build-mocks`)
 3. Run `make test-all` before committing
 4. Use descriptive commit messages
 5. Keep functions short and focused
 6. Document public APIs with GoDoc comments
 
+## 📚 Resources
+
+- [Cloudwego Eino Documentation](https://github.com/cloudwego/eino)
+- [Ollama Documentation](https://github.com/ollama/ollama)
+- [Go Chi Router](https://github.com/go-chi/chi)
+- [Zerolog](https://github.com/rs/zerolog)
+
+## 🔨 Development Commands Reference
+
+| Command            | Description                     |
+| ------------------ | ------------------------------- |
+| `make build`       | Build the application           |
+| `make start`       | Run the built binary            |
+| `make test`        | Run unit tests                  |
+| `make build-mocks` | Generate mock implementations   |
+| `make test-all`    | Run tests + vet + fmt + lint    |
+| `make fmt`         | Format code with go fmt         |
+| `make vet`         | Vet code with go vet            |
+| `make lint`        | Lint code with golangci-lint    |
+| `make tool`        | Install development tools       |
+| `make clean`       | Clean build artifacts           |
+| `make vendor`      | Vendor dependencies             |
+| `make all`         | Full setup: tool + init + build |
+
 ---
 
-**Note**: This boilerplate is designed for production use with best practices for maintainability, testability, and observability.
+**Note**: This project is designed as a learning and testing environment for Cloudwego Eino framework. Feel free to experiment with different LLM models, prompts, and Eino patterns!
