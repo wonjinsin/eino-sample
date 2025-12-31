@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 
-	"github.com/wonjinsin/simple-chatbot/internal/repository"
-	"github.com/wonjinsin/simple-chatbot/pkg/errors"
+	"github.com/wonjinsin/eino-sample/internal/repository"
+	"github.com/wonjinsin/eino-sample/pkg/errors"
 )
 
 type basicChatService struct {

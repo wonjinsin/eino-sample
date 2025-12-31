@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/wonjinsin/simple-chatbot/pkg/constants"
+	"github.com/wonjinsin/eino-sample/pkg/constants"
 )
 
 // GenerateID generates a unique ID using timestamp and counter

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -16,68 +15,11 @@ import (
 	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
-	"github.com/wonjinsin/simple-chatbot/internal/repository"
-	"github.com/wonjinsin/simple-chatbot/internal/repository/langchain/shared"
-	"github.com/wonjinsin/simple-chatbot/pkg/errors"
-	"github.com/wonjinsin/simple-chatbot/pkg/logger"
+	"github.com/wonjinsin/eino-sample/internal/repository"
+	"github.com/wonjinsin/eino-sample/internal/repository/langchain/shared"
+	"github.com/wonjinsin/eino-sample/pkg/errors"
+	"github.com/wonjinsin/eino-sample/pkg/logger"
 )
-
-// cleanMarkdownJSONParser is a custom parser that cleans markdown code blocks before parsing JSON
-type cleanMarkdownJSONParser[T any] struct {
-	baseParser schema.MessageParser[T]
-}
-
-// Parse cleans markdown code blocks from message content and then parses it
-func (p *cleanMarkdownJSONParser[T]) Parse(ctx context.Context, msg *schema.Message) (T, error) {
-	var result T
-	if msg == nil {
-		return result, nil
-	}
-
-	// Clean markdown code blocks from content
-	content := p.cleanMarkdown(msg.Content)
-
-	// Create a temporary message with cleaned content
-	cleanedMsg := &schema.Message{
-		Role:      msg.Role,
-		Content:   content,
-		ToolCalls: msg.ToolCalls,
-	}
-
-	// Use base parser to parse the cleaned message
-	return p.baseParser.Parse(ctx, cleanedMsg)
-}
-
-// cleanMarkdown removes markdown code blocks and extracts JSON
-func (p *cleanMarkdownJSONParser[T]) cleanMarkdown(content string) string {
-	// Remove markdown code blocks (```json ... ``` or ``` ... ```)
-	markdownCodeBlockRegex := regexp.MustCompile("(?s)```(?:json)?\\s*(.*?)\\s*```")
-	matches := markdownCodeBlockRegex.FindStringSubmatch(content)
-	if len(matches) > 1 {
-		// Extract JSON from code block
-		return strings.TrimSpace(matches[1])
-	}
-
-	// If no code block, try to find JSON object in the content
-	// Find the first { and match until the corresponding }
-	startIdx := strings.Index(content, "{")
-	if startIdx != -1 {
-		braceCount := 0
-		for i := startIdx; i < len(content); i++ {
-			if content[i] == '{' {
-				braceCount++
-			} else if content[i] == '}' {
-				braceCount--
-				if braceCount == 0 {
-					return strings.TrimSpace(content[startIdx : i+1])
-				}
-			}
-		}
-	}
-
-	// Return trimmed content if no JSON found
-	return strings.TrimSpace(content)
-}
 
 type basicChatRepo struct {
 	ollamaLLM model.ToolCallingChatModel

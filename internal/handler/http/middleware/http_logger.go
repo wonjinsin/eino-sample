@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog/log"
 
-	"github.com/wonjinsin/simple-chatbot/pkg/constants"
+	"github.com/wonjinsin/eino-sample/pkg/constants"
 )
 
 // HTTPLogger logs HTTP requests with TrID

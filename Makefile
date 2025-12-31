@@ -1,4 +1,4 @@
-PACKAGE = github.com/wonjinsin/simple-chatbot
+PACKAGE = github.com/wonjinsin/eino-sample
 CUSTOM_OS = ${GOOS}
 BASE_PATH = $(shell pwd)
 BIN = $(BASE_PATH)/bin
@@ -19,7 +19,6 @@ endif
 .PHONY: tool
 tool:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	go install -tags 'mysql' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 	go install go.uber.org/mock/mockgen@latest
 
 .PHONY: build
@@ -61,28 +60,6 @@ tidy:
 .PHONY: vendor
 vendor: build-mocks
 	go mod vendor
-
-# Infrastructure commands
-.PHONY: infra-up
-infra-up:
-	docker compose up -d
-
-.PHONY: infra-down
-infra-down:
-	docker compose down
-
-# Migration command
-.PHONY: migrate-up
-migrate-up:
-	go run cmd/migrate/main.go up
-
-.PHONY: migrate-down
-migrate-down:
-	go run cmd/migrate/main.go down
-
-.PHONY: migrate-version
-migrate-version:
-	go run cmd/migrate/main.go version
 
 .PHONY: start
 start: build 

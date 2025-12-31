@@ -3,12 +3,12 @@ package http
 import (
 	"net/http"
 
-	"github.com/wonjinsin/simple-chatbot/internal/constants"
-	"github.com/wonjinsin/simple-chatbot/internal/handler/http/dto"
-	"github.com/wonjinsin/simple-chatbot/internal/usecase"
-	"github.com/wonjinsin/simple-chatbot/pkg/errors"
-	"github.com/wonjinsin/simple-chatbot/pkg/logger"
-	"github.com/wonjinsin/simple-chatbot/pkg/utils"
+	"github.com/wonjinsin/eino-sample/internal/constants"
+	"github.com/wonjinsin/eino-sample/internal/handler/http/dto"
+	"github.com/wonjinsin/eino-sample/internal/usecase"
+	"github.com/wonjinsin/eino-sample/pkg/errors"
+	"github.com/wonjinsin/eino-sample/pkg/logger"
+	"github.com/wonjinsin/eino-sample/pkg/utils"
 )
 
 // BasicChatController handles basic chat-related HTTP requests

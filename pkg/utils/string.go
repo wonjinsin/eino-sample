@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/wonjinsin/simple-chatbot/pkg/constants"
+	"github.com/wonjinsin/eino-sample/pkg/constants"
 )
 
 var emailRegex = regexp.MustCompile(constants.EmailPattern)

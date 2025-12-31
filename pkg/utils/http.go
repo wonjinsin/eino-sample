@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/wonjinsin/simple-chatbot/pkg/constants"
+	"github.com/wonjinsin/eino-sample/pkg/constants"
 )
 
 // ParsePagination extracts pagination parameters from HTTP request

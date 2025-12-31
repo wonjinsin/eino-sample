@@ -11,13 +11,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/wonjinsin/simple-chatbot/internal/config"
-	"github.com/wonjinsin/simple-chatbot/internal/database"
-	httpHandler "github.com/wonjinsin/simple-chatbot/internal/handler/http"
-	langchain "github.com/wonjinsin/simple-chatbot/internal/repository/langchain/ollama"
-	"github.com/wonjinsin/simple-chatbot/internal/repository/postgres"
-	"github.com/wonjinsin/simple-chatbot/internal/usecase"
-	"github.com/wonjinsin/simple-chatbot/pkg/logger"
+	"github.com/wonjinsin/eino-sample/internal/config"
+	"github.com/wonjinsin/eino-sample/internal/database"
+	httpHandler "github.com/wonjinsin/eino-sample/internal/handler/http"
+	langchain "github.com/wonjinsin/eino-sample/internal/repository/langchain/ollama"
+	"github.com/wonjinsin/eino-sample/internal/usecase"
+	"github.com/wonjinsin/eino-sample/pkg/logger"
 )
 
 func main() {
@@ -40,18 +39,13 @@ func main() {
 	}
 
 	// Initialize database connection
-	userRepo, err := postgres.NewUserRepository(cfg)
-	if err != nil {
-		log.Fatalf("failed to initialize database: %v", err)
-	}
 	basicChatRepo := langchain.NewBasicChatRepo(ollamaLLM)
 
 	// Wiring (Composition Root)
-	userSvc := usecase.NewUserService(userRepo)
 	basicChatSvc := usecase.NewBasicChatService(basicChatRepo)
 
 	// Create chi router
-	router := httpHandler.NewRouter(userSvc, basicChatSvc)
+	router := httpHandler.NewRouter(basicChatSvc)
 	handler := http.TimeoutHandler(router, 59*time.Second, "Timeout")
 
 	srv := &http.Server{

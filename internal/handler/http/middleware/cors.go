@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/wonjinsin/simple-chatbot/pkg/constants"
+	"github.com/wonjinsin/eino-sample/pkg/constants"
 )
 
 // CORSConfig holds CORS configuration

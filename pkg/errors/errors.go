@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	pkgConstants "github.com/wonjinsin/simple-chatbot/internal/constants"
+	pkgConstants "github.com/wonjinsin/eino-sample/internal/constants"
 )
 
 // CustomError represents an error with a 4-digit code

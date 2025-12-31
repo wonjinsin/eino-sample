@@ -13,92 +13,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	domain "github.com/wonjinsin/simple-chatbot/internal/domain"
 	gomock "go.uber.org/mock/gomock"
 )
-
-// MockUserRepository is a mock of UserRepository interface.
-type MockUserRepository struct {
-	ctrl     *gomock.Controller
-	recorder *MockUserRepositoryMockRecorder
-	isgomock struct{}
-}
-
-// MockUserRepositoryMockRecorder is the mock recorder for MockUserRepository.
-type MockUserRepositoryMockRecorder struct {
-	mock *MockUserRepository
-}
-
-// NewMockUserRepository creates a new mock instance.
-func NewMockUserRepository(ctrl *gomock.Controller) *MockUserRepository {
-	mock := &MockUserRepository{ctrl: ctrl}
-	mock.recorder = &MockUserRepositoryMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
-	return m.recorder
-}
-
-// FindByEmail mocks base method.
-func (m *MockUserRepository) FindByEmail(email string) (*domain.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByEmail", email)
-	ret0, _ := ret[0].(*domain.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByEmail indicates an expected call of FindByEmail.
-func (mr *MockUserRepositoryMockRecorder) FindByEmail(email any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByEmail", reflect.TypeOf((*MockUserRepository)(nil).FindByEmail), email)
-}
-
-// FindByID mocks base method.
-func (m *MockUserRepository) FindByID(id int) (*domain.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", id)
-	ret0, _ := ret[0].(*domain.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByID indicates an expected call of FindByID.
-func (mr *MockUserRepositoryMockRecorder) FindByID(id any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockUserRepository)(nil).FindByID), id)
-}
-
-// List mocks base method.
-func (m *MockUserRepository) List(offset, limit int) (domain.Users, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", offset, limit)
-	ret0, _ := ret[0].(domain.Users)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// List indicates an expected call of List.
-func (mr *MockUserRepositoryMockRecorder) List(offset, limit any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockUserRepository)(nil).List), offset, limit)
-}
-
-// Save mocks base method.
-func (m *MockUserRepository) Save(arg0 *domain.User) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Save indicates an expected call of Save.
-func (mr *MockUserRepositoryMockRecorder) Save(arg0 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockUserRepository)(nil).Save), arg0)
-}
 
 // MockBasicChatRepository is a mock of BasicChatRepository interface.
 type MockBasicChatRepository struct {
@@ -182,6 +98,36 @@ func (m *MockBasicChatRepository) AskBasicPromptTemplateChat(ctx context.Context
 func (mr *MockBasicChatRepositoryMockRecorder) AskBasicPromptTemplateChat(ctx, msg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AskBasicPromptTemplateChat", reflect.TypeOf((*MockBasicChatRepository)(nil).AskBasicPromptTemplateChat), ctx, msg)
+}
+
+// AskWithGraph mocks base method.
+func (m *MockBasicChatRepository) AskWithGraph(ctx context.Context, msg string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AskWithGraph", ctx, msg)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AskWithGraph indicates an expected call of AskWithGraph.
+func (mr *MockBasicChatRepositoryMockRecorder) AskWithGraph(ctx, msg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AskWithGraph", reflect.TypeOf((*MockBasicChatRepository)(nil).AskWithGraph), ctx, msg)
+}
+
+// AskWithGraphWithBranch mocks base method.
+func (m *MockBasicChatRepository) AskWithGraphWithBranch(ctx context.Context, arg1 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AskWithGraphWithBranch", ctx, arg1)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AskWithGraphWithBranch indicates an expected call of AskWithGraphWithBranch.
+func (mr *MockBasicChatRepositoryMockRecorder) AskWithGraphWithBranch(ctx, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AskWithGraphWithBranch", reflect.TypeOf((*MockBasicChatRepository)(nil).AskWithGraphWithBranch), ctx, arg1)
 }
 
 // AskWithTool mocks base method.

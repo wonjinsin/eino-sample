@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/wonjinsin/simple-chatbot/pkg/constants"
+	"github.com/wonjinsin/eino-sample/pkg/constants"
 )
 
 // Initialize sets up the global logger
@@ -21,8 +21,8 @@ func Initialize(env string) {
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
 		// Prefer repo-relative path if possible (e.g., "internal/handler/http/basic_chat_controller.go")
 		short := file
-		if i := strings.Index(file, "/simple-chatbot/"); i >= 0 {
-			short = file[i+len("/simple-chatbot/"):]
+		if i := strings.Index(file, "/eino-sample/"); i >= 0 {
+			short = file[i+len("/eino-sample/"):]
 		} else if wd, err := os.Getwd(); err == nil {
 			short, _ = strings.CutPrefix(file, wd+"/")
 		}
